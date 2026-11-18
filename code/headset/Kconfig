@@ -1,0 +1,13 @@
+mainmenu "Headphones"
+
+config HEADSET_USB_VID
+    hex "Assigned headset USB vendor ID"
+    range 0x0000 0xffff
+    default 0
+
+config HEADSET_USB_PID
+    hex "Assigned headset USB product ID"
+    range 0x0000 0xffff
+    default 0
+
+source "Kconfig.zephyr"

@@ -3,3 +3,6 @@
 *.kicad_sch-bak
 *-backups/
 ~*.lck
+/.idea/
+/build/
+/code/headset/build/

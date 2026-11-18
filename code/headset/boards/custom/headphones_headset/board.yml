@@ -1,0 +1,6 @@
+board:
+  name: headphones_headset
+  full_name: Headphones main PCB
+  vendor: others
+  socs:
+    - name: nrf52840

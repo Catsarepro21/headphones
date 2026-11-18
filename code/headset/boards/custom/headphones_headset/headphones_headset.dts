@@ -1,0 +1,72 @@
+/dts-v1/;
+
+#include <nordic/nrf52840_qiaa.dtsi>
+#include <zephyr/dt-bindings/pinctrl/nrf-pinctrl.h>
+
+/ {
+    model = "Headphones main PCB";
+    compatible = "headphones,headset";
+
+    chosen {
+        zephyr,sram = &sram0;
+        zephyr,flash = &flash0;
+    };
+};
+
+&pinctrl {
+    bm83_uart_default: bm83_uart_default {
+        tx {
+            psels = <NRF_PSEL(UART_TX, 0, 1)>;
+        };
+        rx {
+            psels = <NRF_PSEL(UART_RX, 0, 0)>;
+            bias-pull-up;
+        };
+    };
+    rgb_spi_pins: rgb_spi_pins {
+        group1 {
+            psels = <NRF_PSEL(SPIM_MOSI, 0, 20)>;
+        };
+    };
+    codec_i2c_pins: codec_i2c_pins {
+        group1 {
+            psels = <NRF_PSEL(TWIM_SCL, 0, 6)>,
+                    <NRF_PSEL(TWIM_SDA, 0, 7)>;
+        };
+    };
+};
+
+&gpio0 {
+    status = "okay";
+};
+
+&gpio1 {
+    status = "okay";
+};
+
+&gpiote {
+    status = "okay";
+};
+
+&uart0 {
+    status = "okay";
+    current-speed = <115200>;
+    pinctrl-0 = <&bm83_uart_default>;
+    pinctrl-names = "default";
+};
+
+&spi2 {
+    status = "okay";
+    pinctrl-0 = <&rgb_spi_pins>;
+    pinctrl-names = "default";
+};
+
+&i2c0 {
+    status = "okay";
+    pinctrl-0 = <&codec_i2c_pins>;
+    pinctrl-names = "default";
+};
+
+zephyr_udc0: &usbd {
+    status = "okay";
+};

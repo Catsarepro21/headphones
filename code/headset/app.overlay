@@ -1,0 +1,8 @@
+/ {
+    headphone_rgb: headphone_rgb {
+        compatible = "zephyr,hid-device";
+        label = "Headphone RGB";
+        in-report-size = <64>;
+        in-polling-period-us = <4000>;
+    };
+};

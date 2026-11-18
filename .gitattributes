@@ -1,0 +1,4 @@
+* text=auto eol=lf
+*.step -text -diff
+*.stp -text -diff
+PCB/fabrication/** -text -diff

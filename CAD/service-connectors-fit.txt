@@ -1,0 +1,11 @@
+
+Amphenol 11.2 × 6.7 mm maximum overmold through USB-C opening: 0 solid clashes > 0.01 mm³
+Opening margin per side horizontally: 1.65 mm; vertically: 0.65 mm.
+
+Battery connector shelf stock vs surrounding hardware: 0 solid clashes > 0.01 mm³
+
+Mated battery connector maximum envelope: 0 solid clashes > 0.01 mm³
+
+8 mm negative-Y unmate sweep: 0 solid clashes > 0.01 mm³
+
+Latch and tool access from removable baffle side: 0 solid clashes > 0.01 mm³

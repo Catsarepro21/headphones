@@ -1,0 +1,1 @@
+(fp_lib_table (version 7) (lib (name "Headphones") (type "KiCad") (uri "${KIPRJMOD}/Headphones.pretty") (options "") (descr "E73 module footprint from existing dongle project")))

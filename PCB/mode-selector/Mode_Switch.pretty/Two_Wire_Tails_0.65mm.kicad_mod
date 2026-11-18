@@ -1,0 +1,1 @@
+(footprint "Two_Wire_Tails_0.65mm" (version 20260206) (generator "pcbnew") (layer "F.Cu") (attr through_hole exclude_from_pos_files) (pad "1" thru_hole circle (at -1.25 0) (size 1.05 1.05) (drill 0.65) (layers "*.Cu" "*.Mask")) (pad "2" thru_hole circle (at 1.25 0) (size 1.05 1.05) (drill 0.65) (layers "*.Cu" "*.Mask")))

@@ -1,0 +1,4 @@
+(version 1)
+(rule "Amphenol locating hole to adjacent connector land"
+    (condition "A.Type == 'Pad' && B.Type == 'Pad' && A.Reference == 'J100' && B.Reference == 'J100'")
+    (constraint edge_clearance (min 0.25mm)))

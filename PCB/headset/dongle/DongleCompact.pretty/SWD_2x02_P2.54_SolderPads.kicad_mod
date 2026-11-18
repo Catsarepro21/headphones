@@ -1,0 +1,145 @@
+(footprint "SWD_2x02_P2.54_SolderPads"
+	(version 20260206)
+	(generator "pcbnew")
+	(generator_version "10.0")
+	(layer "F.Cu")
+	(descr "Four plated SWD pads for temporary 2.54 mm programming header")
+	(tags "SWD programming plated test pads")
+	(property "Reference" "J1"
+		(at 0 2.38 0)
+		(layer "B.SilkS")
+		(hide yes)
+		(uuid "b53da6f5-fd15-4fa2-94bf-adc1826f8c1c")
+		(effects
+			(font
+				(size 1 1)
+				(thickness 0.15)
+			)
+			(justify mirror)
+		)
+	)
+	(property "Value" "SWD solder pads"
+		(at 0 -10 0)
+		(layer "B.Fab")
+		(hide yes)
+		(uuid "8fa3af44-dd87-4a15-b2e3-a0cdc4137e5f")
+		(effects
+			(font
+				(size 1 1)
+				(thickness 0.15)
+			)
+			(justify mirror)
+		)
+	)
+	(property "Datasheet" ""
+		(at 0 0 0)
+		(layer "B.Fab")
+		(hide yes)
+		(uuid "6f2ebfe8-5b45-4332-81ec-46a892c13ead")
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify mirror)
+		)
+	)
+	(property "Description" "Generic connector, single row, 01x04, script generated (kicad-library-utils/schlib/autogen/connector/)"
+		(at 0 0 0)
+		(layer "B.Fab")
+		(hide yes)
+		(uuid "ddf677be-268d-4150-b83e-f9ba031ca16d")
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify mirror)
+		)
+	)
+	(property "KiLib_Generator" "connector/pin_header_socket"
+		(at 0 0 0)
+		(layer "B.SilkS")
+		(hide yes)
+		(uuid "25d26ae5-07ab-4467-ae86-74eff7b614f1")
+		(effects
+			(font
+				(size 1 1)
+				(thickness 0.15)
+			)
+			(justify mirror)
+		)
+	)
+	(property ki_fp_filters "Connector*:*_1x??_*")
+	(sheetname "/")
+	(sheetfile "dongle.kicad_sch")
+	(attr smd exclude_from_pos_files exclude_from_bom)
+	(duplicate_pad_numbers_are_jumpers no)
+	(fp_line
+		(start -1.05 -3.59)
+		(end -1.05 1.05)
+		(stroke
+			(width 0.05)
+			(type default)
+		)
+		(layer "F.CrtYd")
+		(uuid "5c2127ee-efcb-406a-9950-6bf280ad8b6c")
+	)
+	(fp_line
+		(start -1.05 1.05)
+		(end 3.59 1.05)
+		(stroke
+			(width 0.05)
+			(type default)
+		)
+		(layer "F.CrtYd")
+		(uuid "ffd8da2b-53e3-4dc0-aded-7f9853ccf95d")
+	)
+	(fp_line
+		(start 3.59 -3.59)
+		(end -1.05 -3.59)
+		(stroke
+			(width 0.05)
+			(type default)
+		)
+		(layer "F.CrtYd")
+		(uuid "ec6afa93-066c-4367-bae3-f356050dbad1")
+	)
+	(fp_line
+		(start 3.59 1.05)
+		(end 3.59 -3.59)
+		(stroke
+			(width 0.05)
+			(type default)
+		)
+		(layer "F.CrtYd")
+		(uuid "589f1e05-e30e-49e0-af32-7c3d1d5ed0a6")
+	)
+	(pad "1" smd circle
+		(at 0 0)
+		(size 1.6 1.6)
+		(layers "F.Cu" "F.Mask")
+		(solder_mask_margin 0.05)
+		(uuid "427a58f7-86bf-4911-954f-b358e600e8a4")
+	)
+	(pad "2" smd circle
+		(at 2.54 0)
+		(size 1.6 1.6)
+		(layers "F.Cu" "F.Mask")
+		(solder_mask_margin 0.05)
+		(uuid "dcd9f7a0-c2cf-4b65-8d1b-c3ac11e1b27d")
+	)
+	(pad "3" smd circle
+		(at 0 -2.54)
+		(size 1.6 1.6)
+		(layers "F.Cu" "F.Mask")
+		(solder_mask_margin 0.05)
+		(uuid "1c613627-6041-4f65-90f3-c306023a797e")
+	)
+	(pad "4" smd circle
+		(at 2.54 -2.54)
+		(size 1.6 1.6)
+		(layers "F.Cu" "F.Mask")
+		(solder_mask_margin 0.05)
+		(uuid "8746f642-cf8e-43b0-bfff-bd80fd7498c3")
+	)
+	(embedded_fonts no)
+)

@@ -1,7 +1,3 @@
-# BOM
-
-The priced parts subtotal is **$136.75 USD**. Blank prices still need quotes or checks. `TBD` marks print and PCB fabrication or assembly costs. Prices are from the live BOM and exclude shipping and tax. [Live Google Sheet](https://docs.google.com/spreadsheets/d/1EZlvAER-2UgOb8yQGnecRwhJc7PUS93z2gQPCFvvkVY/edit)
-
 | Item | Quantity | Description | Link | Unit price (USD) | Total price (USD) | Notes |
 | --- | --- | --- | --- | --- | --- | --- |
 | OKCSC 110 mm padded headband | 1 | Adjustable headband and yokes | [Buy](<https://www.aliexpress.us/item/3256810368016901.html>) | $29.00 | $29.00 |  |

@@ -1,0 +1,12 @@
+#ifndef HEADPHONES_AUDIO_CONTROL_H
+#define HEADPHONES_AUDIO_CONTROL_H
+
+enum {
+    AUDIO_CONTROL = 2,
+    AUDIO_CAPTURE_ENABLE = 1,
+    AUDIO_PLAY_PAUSE = 0xcd,
+    AUDIO_VOLUME_UP = 0xe9,
+    AUDIO_VOLUME_DOWN = 0xea,
+};
+
+#endif

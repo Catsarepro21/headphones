@@ -1,3 +1,5 @@
+#include "../common/flash.dtsi"
+
 / {
     headphone_rgb: headphone_rgb {
         compatible = "zephyr,hid-device";

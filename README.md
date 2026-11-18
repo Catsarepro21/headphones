@@ -16,9 +16,9 @@ The design uses printed closed-back cups, an adjustable OKCSC headband, KUTOU ov
 - [Button board](PCB/controls/headset-controls.kicad_pro) · [Mode selector](PCB/mode-selector/headset-mode-selector.kicad_pro)
 - [Board fabrication and placement files](PCB/fabrication/)
 - [Wiring and connector pinout](PCB/Harness%20wiring.md) · [LED power and bench checks](PCB/LED%20rail%20protection.md)
-- [Headset firmware](code/headset/) · [SignalRGB plugin](code/signalrgb/Headphones.js)
+- [Headset firmware](code/headset/) · [USB dongle firmware](code/dongle/) · [SignalRGB plugin](code/signalrgb/Headphones.js)
 
-The headset firmware builds. I still need to write the dongle audio code and test everything on the boards.
+The headset and dongle firmware cover Bluetooth controls, dongle playback and the boom mic. I still need to test them on the boards.
 
 Full BOM:
 

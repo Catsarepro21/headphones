@@ -1,4 +1,5 @@
 #include "rgb.h"
+#include "rgb_frame.h"
 
 #include <errno.h>
 #include <string.h>
@@ -6,24 +7,14 @@
 #include <zephyr/drivers/gpio.h>
 #include <zephyr/drivers/spi.h>
 #include <zephyr/kernel.h>
-#include <zephyr/sys/atomic.h>
 #include <zephyr/sys/printk.h>
 #include <zephyr/usb/class/usbd_hid.h>
 #include <zephyr/usb/usbd.h>
 
 enum {
     RGB_ENABLE_PIN = 22,
-    REPORT_ID = 1,
-    RGB_CHANNELS = 3,
-    CUP_LEDS = 16,
-    CUP_BYTES = CUP_LEDS * RGB_CHANNELS,
-    FRAME_BYTES = 2 * CUP_BYTES,
-    REPORT_HEADER = 4,
-    REPORT_BYTES = REPORT_HEADER + CUP_BYTES,
-    COMMAND_FRAME = 0x52,
     SYMBOL_BITS = 10,
     RESET_BYTES = 320,
-    RGB_TIMEOUT_MS = 1000,
     CHANNEL_SUM_LIMIT = 4800,
 };
 
@@ -34,16 +25,19 @@ static const struct spi_config spi_config = {
     .frequency = 8000000,
     .operation = SPI_OP_MODE_MASTER | SPI_WORD_SET(8),
 };
-static uint8_t wave[FRAME_BYTES * SYMBOL_BITS + RESET_BYTES];
-static uint8_t staged[FRAME_BYTES];
-static uint8_t pending[FRAME_BYTES];
-static uint8_t sequence;
-static bool have_left;
-static bool frame_ready;
+struct pixels {
+    uint8_t data[RGB_FRAME_BYTES];
+    uint32_t received_at;
+    bool valid;
+    bool pending;
+};
+
+static uint8_t wave[RGB_FRAME_BYTES * SYMBOL_BITS + RESET_BYTES];
+static struct rgb_frame staged;
+static struct pixels usb_pixels;
+static struct pixels wireless_pixels;
 static struct k_spinlock frame_lock;
-static atomic_t usb_active;
 static bool rail_enabled;
-static uint32_t last_frame;
 
 USBD_DEVICE_DEFINE(headset_usb, DEVICE_DT_GET(DT_NODELABEL(zephyr_udc0)),
                    CONFIG_HEADSET_USB_VID, CONFIG_HEADSET_USB_PID);
@@ -51,51 +45,55 @@ USBD_DESC_LANG_DEFINE(lang);
 USBD_DESC_PRODUCT_DEFINE(product, "Headphones RGB");
 USBD_CONFIGURATION_DEFINE(usb_config, USB_SCD_SELF_POWERED, 50, NULL);
 
-static const uint8_t report_descriptor[] = {
-    0x06, 0x31, 0xff,
-    0x09, 0x01, 0xa1, 0x01,
-    0x85, REPORT_ID,
-    0x15, 0x00, 0x26, 0xff, 0x00,
-    0x75, 0x08, 0x95, REPORT_BYTES - 1,
-    0x09, 0x02, 0xb1, 0x02,
-    0xc0,
-};
+static const uint8_t report_descriptor[] = {RGB_HID_DESCRIPTOR_BYTES};
 
 static int receive_report(const struct device *dev, uint8_t type, uint8_t id,
                           uint16_t len, const uint8_t *data)
 {
     (void)dev;
-    if (type != HID_REPORT_TYPE_FEATURE || id != REPORT_ID ||
-        len != REPORT_BYTES || data[0] != REPORT_ID ||
-        data[1] != COMMAND_FRAME || data[3] > 1U) {
+    if (type != HID_REPORT_TYPE_FEATURE || id != RGB_REPORT_ID) {
         return -EINVAL;
     }
 
+    const uint32_t now = k_uptime_get_32();
     k_spinlock_key_t key = k_spin_lock(&frame_lock);
-    if (data[3] == 0U) {
-        memcpy(staged, data + REPORT_HEADER, CUP_BYTES);
-        sequence = data[2];
-        have_left = true;
-    } else if (have_left && data[2] == sequence) {
-        memcpy(staged + CUP_BYTES, data + REPORT_HEADER, CUP_BYTES);
-        memcpy(pending, staged, sizeof(pending));
-        have_left = false;
-        frame_ready = true;
+    const int status = rgb_frame_accept(&staged, usb_pixels.data, data, len, now);
+    if (status > 0) {
+        usb_pixels.received_at = now;
+        usb_pixels.valid = true;
+        usb_pixels.pending = true;
     }
     k_spin_unlock(&frame_lock, key);
-    return 0;
+    return status < 0 ? status : 0;
 }
 
 static void usb_ready(const struct device *dev, bool ready)
 {
     (void)dev;
-    atomic_set(&usb_active, ready);
     if (!ready) {
         k_spinlock_key_t key = k_spin_lock(&frame_lock);
-        have_left = false;
-        frame_ready = false;
+        staged.have_left = false;
+        usb_pixels.valid = false;
         k_spin_unlock(&frame_lock, key);
     }
+}
+
+void rgb_receive_wireless(const uint8_t *pixels)
+{
+    const uint32_t now = k_uptime_get_32();
+    k_spinlock_key_t key = k_spin_lock(&frame_lock);
+    memcpy(wireless_pixels.data, pixels, RGB_FRAME_BYTES);
+    wireless_pixels.received_at = now;
+    wireless_pixels.valid = true;
+    wireless_pixels.pending = true;
+    k_spin_unlock(&frame_lock, key);
+}
+
+void rgb_clear_wireless(void)
+{
+    k_spinlock_key_t key = k_spin_lock(&frame_lock);
+    wireless_pixels.valid = false;
+    k_spin_unlock(&frame_lock, key);
 }
 
 static const struct hid_device_ops hid_ops = {
@@ -174,7 +172,7 @@ static int send_pixels(const uint8_t *rgb, uint32_t sum)
 {
     const uint8_t channel_order[] = {1, 0, 2};
     uint8_t *out = wave;
-    for (size_t pixel = 0; pixel < FRAME_BYTES; pixel += RGB_CHANNELS) {
+    for (size_t pixel = 0; pixel < RGB_FRAME_BYTES; pixel += RGB_CHANNELS) {
         for (size_t channel = 0; channel < RGB_CHANNELS; ++channel) {
             uint8_t value = rgb[pixel + channel_order[channel]];
             if (sum > CHANNEL_SUM_LIMIT) {
@@ -198,16 +196,24 @@ static void turn_off(void)
 
 void rgb_poll(void)
 {
-    const uint32_t now = k_uptime_get_32();
-    uint8_t pixels[FRAME_BYTES];
+    if (!device_is_ready(spi)) {
+        return;
+    }
+    uint8_t pixels[RGB_FRAME_BYTES];
     k_spinlock_key_t key = k_spin_lock(&frame_lock);
-    const bool ready = frame_ready;
+    const uint32_t now = k_uptime_get_32();
+    usb_pixels.valid &= now - usb_pixels.received_at < RGB_TIMEOUT_MS;
+    wireless_pixels.valid &= now - wireless_pixels.received_at < RGB_TIMEOUT_MS;
+    struct pixels *const source = usb_pixels.valid ? &usb_pixels : &wireless_pixels;
+    const bool active = source->valid;
+    const bool ready = active && source->pending;
     if (ready) {
-        memcpy(pixels, pending, sizeof(pixels));
-        frame_ready = false;
+        memcpy(pixels, source->data, sizeof(pixels));
+        source->pending = false;
+        (source == &usb_pixels ? &wireless_pixels : &usb_pixels)->pending = true;
     }
     k_spin_unlock(&frame_lock, key);
-    if (!atomic_get(&usb_active) || (!ready && now - last_frame >= RGB_TIMEOUT_MS)) {
+    if (!active) {
         turn_off();
         return;
     }
@@ -235,5 +241,4 @@ void rgb_poll(void)
         printk("RGB SPI transfer failed\n");
         return;
     }
-    last_frame = now;
 }

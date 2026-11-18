@@ -46,6 +46,79 @@ static int write_register(uint8_t reg, uint8_t value)
     return i2c_reg_write_byte(i2c, AIC3204_ADDRESS, reg, value);
 }
 
+static const uint8_t audio_start[][2] = {
+    {PAGE_SELECT, 1},
+    {1, 0x08},
+    {2, 0x00},
+    {123, 0x01},
+    {20, 0x25},
+    {10, 0x00},
+    {12, 0x08},
+    {13, 0x08},
+    {16, 0x00},
+    {17, 0x00},
+    {51, 0x68},
+    {52, 0x40},
+    {54, 0x40},
+    {59, 0x18},
+    {9, 0x30},
+    {PAGE_SELECT, 0},
+    {60, 0x01},
+    {61, 0x01},
+    {63, 0xd6},
+    {64, 0x0c},
+    {65, 0xd0},
+    {66, 0xd0},
+    {81, 0x80},
+    {82, 0x08},
+};
+
+static int write_table(const uint8_t (*settings)[2], size_t count)
+{
+    for (size_t i = 0; i < count; ++i) {
+        const int status = write_register(settings[i][0], settings[i][1]);
+        if (status != 0) {
+            return status;
+        }
+    }
+    return 0;
+}
+
+int codec_audio_start(void)
+{
+    return write_table(audio_start, ARRAY_SIZE(audio_start));
+}
+
+int codec_audio_unmute(void)
+{
+    uint8_t headphone_status;
+    int status = write_register(PAGE_SELECT, 1);
+    if (status == 0) {
+        status = i2c_reg_read_byte(i2c, AIC3204_ADDRESS, 63, &headphone_status);
+    }
+    if (status != 0) {
+        return status;
+    }
+    status = write_register(PAGE_SELECT, 0);
+    if (status != 0) {
+        return status;
+    }
+    return (headphone_status & 0xc0U) == 0xc0U ? write_register(64, 0) : -EAGAIN;
+}
+
+int codec_audio_stop(void)
+{
+    const uint8_t stop[][2] = {
+        {PAGE_SELECT, 0}, {64, 0x0c}, {82, 0x88}, {81, 0}, {63, 0},
+        {PAGE_SELECT, 1}, {9, 0}, {51, 0}, {2, 0x08}, {PAGE_SELECT, 0},
+    };
+    const int status = write_table(stop, ARRAY_SIZE(stop));
+    if (status != 0) {
+        (void)gpio_pin_set_raw(gpio, CODEC_RESET_PIN, 0);
+    }
+    return status;
+}
+
 static int configure_clocks(void)
 {
     int status = write_register(PAGE_SELECT, 0);

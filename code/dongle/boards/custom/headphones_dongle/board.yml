@@ -1,0 +1,6 @@
+board:
+  name: headphones_dongle
+  full_name: Headphones USB dongle
+  vendor: others
+  socs:
+    - name: nrf52840

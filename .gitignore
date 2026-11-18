@@ -6,3 +6,5 @@
 /.idea/
 /build/
 /code/headset/build/
+/code/dongle/build/
+/build-dongle/

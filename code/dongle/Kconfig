@@ -1,0 +1,13 @@
+mainmenu "Headphones dongle"
+
+config DONGLE_USB_VID
+    hex "Assigned dongle USB vendor ID"
+    range 0x0000 0xffff
+    default 0
+
+config DONGLE_USB_PID
+    hex "Assigned dongle USB product ID"
+    range 0x0000 0xffff
+    default 0
+
+source "Kconfig.zephyr"

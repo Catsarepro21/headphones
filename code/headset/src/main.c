@@ -7,9 +7,11 @@
 #include <zephyr/sys/printk.h>
 
 #include "bm83_link.h"
+#include "audio_control.h"
 #include "codec.h"
 #include "headset_logic.h"
 #include "rgb.h"
+#include "wireless_audio.h"
 
 enum {
     PIN_MODE_N = 29,
@@ -61,6 +63,12 @@ int main(void)
     if (bt_status < 0) {
         printk("BM83 UART setup failed: %d\n", bt_status);
     }
+    if (codec_status == 0) {
+        const int wireless_status = wireless_audio_start();
+        if (wireless_status < 0) {
+            printk("Dongle audio setup failed: %d\n", wireless_status);
+        }
+    }
     const int rgb_status = rgb_start();
     if (rgb_status < 0) {
         printk("RGB over USB unavailable: %d\n", rgb_status);
@@ -100,6 +108,21 @@ int main(void)
             if (bt_status == 0) {
                 bm83_set_selected(inputs.mode_bluetooth.stable);
             }
+            wireless_audio_select(!inputs.mode_bluetooth.stable);
+        }
+        if (!inputs.mode_bluetooth.stable) {
+            if ((events & HEADSET_PAIR_PRESSED) != 0U) {
+                wireless_audio_pair();
+            }
+            if (play_pressed) {
+                wireless_audio_media(AUDIO_PLAY_PAUSE);
+            }
+            if (down_pressed) {
+                wireless_audio_media(AUDIO_VOLUME_DOWN);
+            }
+            if (up_pressed) {
+                wireless_audio_media(AUDIO_VOLUME_UP);
+            }
         }
         if (bt_status == 0) {
             if ((events & HEADSET_PAIR_PRESSED) != 0U) {
@@ -125,9 +148,8 @@ int main(void)
             }
         }
 
-        if (rgb_status == 0) {
-            rgb_poll();
-        }
+        rgb_poll();
+        wireless_audio_poll();
         k_msleep(5);
     }
 }

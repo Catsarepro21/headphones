@@ -4443,7 +4443,7 @@
 				)
 			)
 		)
-		(property "Value" "3.09k"
+		(property "Value" "3.92k"
 			(at 0 1.65 90)
 			(layer "F.Fab")
 			(hide yes)
@@ -5493,7 +5493,7 @@
 			)
 		)
 		(path "/65ee24df-cc7e-4fd9-a0bc-48b2ffa50988")
-		(attr smd)
+		(attr smd dnp)
 		(duplicate_pad_numbers_are_jumpers no)
 		(fp_line
 			(start -1.25 -2.75)
@@ -16770,7 +16770,7 @@
 				)
 			)
 		)
-		(property "Value" "1M"
+		(property "Value" "56k"
 			(at 0 1.65 0)
 			(layer "F.Fab")
 			(hide yes)
@@ -23870,7 +23870,7 @@
 				(justify mirror)
 			)
 		)
-		(property "Value" "TLV803EA30DBZR"
+		(property "Value" "TLV803EA29DBZR"
 			(at 0 -2.4 180)
 			(layer "B.Fab")
 			(hide yes)

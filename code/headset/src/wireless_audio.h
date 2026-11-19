@@ -9,5 +9,6 @@ void wireless_audio_select(bool selected);
 void wireless_audio_poll(void);
 void wireless_audio_pair(void);
 void wireless_audio_media(uint8_t usage);
+void wireless_audio_set_mic_muted(bool muted);
 
 #endif

@@ -24,6 +24,7 @@ static const struct device *const i2s = DEVICE_DT_GET(DT_NODELABEL(i2s0));
 static atomic_t selected;
 static atomic_t mic_requested;
 static atomic_t mic_at;
+static atomic_t mic_muted = ATOMIC_INIT(1);
 static bool initialized;
 AUDIO_FIFO_DEFINE(speaker, AUDIO_STEREO);
 K_MEM_SLAB_DEFINE_STATIC(pcm_tx, PCM_BYTES, 5, 4);
@@ -90,11 +91,13 @@ static int pump_audio(void)
         }
         if (active() && atomic_get(&mic_requested) && size == PCM_BYTES &&
             k_uptime_get_32() - (uint32_t)atomic_get(&mic_at) < 1500U) {
-            int16_t mono[AUDIO_FRAMES];
+            int16_t mono[AUDIO_FRAMES] = {0};
             uint8_t packet[AUDIO_PACKET_MAX];
             const int16_t *const stereo = block;
-            for (size_t i = 0; i < AUDIO_FRAMES; ++i) {
-                mono[i] = stereo[i * AUDIO_STEREO];
+            if (!atomic_get(&mic_muted)) {
+                for (size_t i = 0; i < AUDIO_FRAMES; ++i) {
+                    mono[i] = stereo[i * AUDIO_STEREO];
+                }
             }
             const size_t length = audio_encode(&encoder, packet, mono, AUDIO_MONO);
             (void)radio_send(packet, length);
@@ -231,4 +234,9 @@ void wireless_audio_media(uint8_t usage)
         const uint8_t packet[] = {AUDIO_CONTROL, usage, 0};
         (void)radio_send(packet, sizeof(packet));
     }
+}
+
+void wireless_audio_set_mic_muted(bool muted)
+{
+    atomic_set(&mic_muted, muted);
 }

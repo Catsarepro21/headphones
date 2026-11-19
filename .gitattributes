@@ -2,3 +2,4 @@
 *.step -text -diff
 *.stp -text -diff
 PCB/fabrication/** -text -diff
+PCB/fabrication/*.md text diff eol=lf

@@ -33,6 +33,7 @@ static uint32_t pair_started;
 static uint32_t power_started;
 static uint8_t awaiting;
 static uint8_t action;
+static uint8_t command_link;
 static uint8_t attempts;
 static uint8_t handsfree_links;
 static uint8_t hf_device[2];
@@ -50,6 +51,8 @@ static bool power_release_needed;
 static bool power_requested;
 static bool power_starting;
 static bool powered;
+static bool mic_muted = true;
+static bool mic_update_pending;
 
 static void command_failed(void)
 {
@@ -99,7 +102,7 @@ static int send_frame(uint8_t command, const uint8_t *params, size_t count)
 
 static void send_pending(void)
 {
-    uint8_t params[6] = {0, action};
+    uint8_t params[6] = {command_link, action};
     size_t count = awaiting == BM83_CMD_VERSION ? 1U : 2U;
     if (awaiting == BM83_CMD_SET_GAIN) {
         params[0] = call_link < 2U ? call_link : (media_links & 1U ? 0U : 1U);
@@ -118,10 +121,11 @@ static void send_pending(void)
     }
 }
 
-static void queue_command(uint8_t command, uint8_t mmi_action)
+static void queue_command(uint8_t command, uint8_t mmi_action, uint8_t link)
 {
     awaiting = command;
     action = mmi_action;
+    command_link = link;
     attempts = 0;
     send_pending();
 }
@@ -147,6 +151,9 @@ static void handle_event(uint32_t now)
                 power_starting = !powered;
                 power_started = now;
                 printk("BM83 accepted power-on sequence\n");
+                break;
+            case BM83_ACTION_MIC_MUTE:
+            case BM83_ACTION_MIC_UNMUTE:
                 break;
             default:
                 pairing = action == BM83_ACTION_PAIR;
@@ -222,9 +229,12 @@ static void handle_event(uint32_t now)
             media_links &= ~mask;
             break;
         case 0x09:
+            call_link = UINT8_MAX;
             for (uint8_t index = 0; index < 2U; ++index) {
                 if ((handsfree_links & (1U << index)) != 0U && hf_device[index] == link) {
                     call_link = index;
+                    mic_update_pending = true;
+                    break;
                 }
             }
             break;
@@ -256,6 +266,7 @@ int bm83_start(void)
 
 void bm83_set_selected(bool enabled)
 {
+    mic_update_pending |= selected != enabled;
     selected = enabled;
     if (enabled && !responsive && !command_pending) {
         probe_needed = true;
@@ -266,6 +277,12 @@ void bm83_set_selected(bool enabled)
         exit_pairing |= pairing;
         k_msgq_purge(&media_queue);
     }
+}
+
+void bm83_set_mic_muted(bool muted)
+{
+    mic_update_pending |= mic_muted != muted;
+    mic_muted = muted;
 }
 
 void bm83_request_media(enum bm83_media_control control)
@@ -317,7 +334,11 @@ void bm83_poll(void)
         if (now - sent_at < wait) {
             return;
         }
-        if (attempts < MAX_ATTEMPTS &&
+        const bool stale_mic_command = awaiting == BM83_CMD_MMI &&
+            (action == BM83_ACTION_MIC_MUTE || action == BM83_ACTION_MIC_UNMUTE) &&
+            (command_link != call_link ||
+             action != ((mic_muted || !selected) ? BM83_ACTION_MIC_MUTE : BM83_ACTION_MIC_UNMUTE));
+        if (!stale_mic_command && attempts < MAX_ATTEMPTS &&
             (awaiting == BM83_CMD_VERSION || awaiting == BM83_CMD_MMI)) {
             send_pending();
             return;
@@ -327,32 +348,36 @@ void bm83_poll(void)
     }
     if (power_release_needed) {
         power_release_needed = false;
-        queue_command(BM83_CMD_MMI, BM83_ACTION_POWER_RELEASE);
+        queue_command(BM83_CMD_MMI, BM83_ACTION_POWER_RELEASE, 0);
+    } else if (mic_update_pending && powered && call_link < 2U) {
+        mic_update_pending = false;
+        queue_command(BM83_CMD_MMI,
+            (mic_muted || !selected) ? BM83_ACTION_MIC_MUTE : BM83_ACTION_MIC_UNMUTE, call_link);
     } else if (probe_needed && selected) {
         probe_needed = false;
-        queue_command(BM83_CMD_VERSION, 0);
+        queue_command(BM83_CMD_VERSION, 0, 0);
     } else if (exit_pairing || (pairing && now - pair_started >= PAIR_MS)) {
         exit_pairing = false;
         pairing = false;
-        queue_command(BM83_CMD_MMI, BM83_ACTION_EXIT_PAIR);
+        queue_command(BM83_CMD_MMI, BM83_ACTION_EXIT_PAIR, 0);
     } else if (selected && responsive && power_requested && !power_starting) {
         power_requested = false;
         if (!powered) {
-            queue_command(BM83_CMD_MMI, BM83_ACTION_POWER_PRESS);
+            queue_command(BM83_CMD_MMI, BM83_ACTION_POWER_PRESS, 0);
         }
     } else if (selected && responsive && powered && pair_requested) {
         pair_requested = false;
-        queue_command(BM83_CMD_MMI, BM83_ACTION_PAIR);
+        queue_command(BM83_CMD_MMI, BM83_ACTION_PAIR, 0);
     } else if (selected && powered) {
         enum bm83_media_control control;
         if (k_msgq_get(&media_queue, &control, K_NO_WAIT) != 0) {
             return;
         }
         if (control == BM83_MEDIA_PLAY_PAUSE && media_links != 0U && call_link == UINT8_MAX) {
-            queue_command(BM83_CMD_MUSIC_CONTROL, 0x07);
+            queue_command(BM83_CMD_MUSIC_CONTROL, 0x07, 0);
         } else if (control != BM83_MEDIA_PLAY_PAUSE &&
                    (media_links != 0U || call_link < 2U)) {
-            queue_command(BM83_CMD_SET_GAIN, control == BM83_MEDIA_VOLUME_UP ? 0x01 : 0x02);
+            queue_command(BM83_CMD_SET_GAIN, control == BM83_MEDIA_VOLUME_UP ? 0x01 : 0x02, 0);
         }
     }
 }

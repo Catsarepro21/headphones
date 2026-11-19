@@ -8,6 +8,7 @@
 
 #include "bm83_link.h"
 #include "audio_control.h"
+#include "battery.h"
 #include "codec.h"
 #include "headset_logic.h"
 #include "rgb.h"
@@ -19,12 +20,11 @@ enum {
     PIN_PLAY_N = 24,
     PIN_DOWN_N = 0,
     PIN_UP_N = 2,
-    PIN_USB_EN1 = 26,
-    PIN_USB_EN2 = 13,
     PIN_RGB_ENABLE = 22,
     PIN_BT_AUDIO_SEL = 31,
     PIN_CHG_N = 4,
     PIN_PGOOD_N = 5,
+    PIN_BOOM_N = 11,
 };
 
 static const struct device *const gpio0 = DEVICE_DT_GET(DT_NODELABEL(gpio0));
@@ -33,6 +33,7 @@ static const struct device *const gpio1 = DEVICE_DT_GET(DT_NODELABEL(gpio1));
 int main(void)
 {
     struct headset_inputs inputs = {0};
+    struct headset_input boom = {0};
     bool bluetooth_routed = false;
     int last_charger_status = -1;
 
@@ -43,11 +44,10 @@ int main(void)
 
     if (gpio_pin_configure(gpio0, PIN_RGB_ENABLE, GPIO_OUTPUT_INACTIVE) < 0 ||
         gpio_pin_configure(gpio0, PIN_BT_AUDIO_SEL, GPIO_OUTPUT_INACTIVE) < 0 ||
-        gpio_pin_configure(gpio0, PIN_USB_EN1, GPIO_OUTPUT_INACTIVE) < 0 ||
-        gpio_pin_configure(gpio1, PIN_USB_EN2, GPIO_OUTPUT_INACTIVE) < 0 ||
         gpio_pin_configure(gpio0, PIN_CHG_N, GPIO_INPUT) < 0 ||
         gpio_pin_configure(gpio0, PIN_PGOOD_N, GPIO_INPUT) < 0 ||
         gpio_pin_configure(gpio0, PIN_MODE_N, GPIO_INPUT) < 0 ||
+        gpio_pin_configure(gpio1, PIN_BOOM_N, GPIO_INPUT | GPIO_PULL_UP) < 0 ||
         gpio_pin_configure(gpio1, PIN_PAIR_N, GPIO_INPUT | GPIO_PULL_UP) < 0 ||
         gpio_pin_configure(gpio0, PIN_PLAY_N, GPIO_INPUT | GPIO_PULL_UP) < 0 ||
         gpio_pin_configure(gpio1, PIN_DOWN_N, GPIO_INPUT | GPIO_PULL_UP) < 0 ||
@@ -57,6 +57,10 @@ int main(void)
     }
 
     printk("Headset bring-up\n");
+    const int battery_status = battery_start();
+    if (battery_status < 0) {
+        printk("Battery monitor unavailable: %d\n", battery_status);
+    }
     const int codec_status = codec_prepare();
     printk("Codec clock register setup: %d\n", codec_status);
     const int bt_status = bm83_start();
@@ -89,6 +93,13 @@ int main(void)
         }
 
         const uint32_t now = k_uptime_get_32();
+        const bool boom_muted = !headset_boom_deployed(&boom,
+            gpio_pin_get_raw(gpio1, PIN_BOOM_N) == 0, now);
+        bm83_set_mic_muted(boom_muted);
+        wireless_audio_set_mic_muted(boom_muted);
+        if (battery_status == 0) {
+            battery_poll(now);
+        }
         const uint8_t events = headset_inputs_update(&inputs, mode == 0, pair == 0, now);
         const bool play_pressed = headset_button_pressed(&inputs.play, play == 0, now);
         const bool down_pressed = headset_button_pressed(&inputs.volume_down, down == 0, now);
@@ -148,7 +159,7 @@ int main(void)
             }
         }
 
-        rgb_poll();
+        rgb_poll(pgood <= 0);
         wireless_audio_poll();
         k_msleep(5);
     }

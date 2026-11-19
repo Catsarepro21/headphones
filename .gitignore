@@ -8,3 +8,6 @@
 /code/headset/build/
 /code/dongle/build/
 /build-dongle/
+/build-headset/
+/code/headset/build-headset/
+/code/dongle/build-dongle/

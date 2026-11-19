@@ -30,6 +30,17 @@ bool headset_button_pressed(struct headset_input *input, bool down, uint32_t now
     return input_changed(input, down, now_ms) && initialized && input->stable;
 }
 
+bool headset_boom_deployed(struct headset_input *input, bool closed, uint32_t now_ms)
+{
+    if (!input->initialized || !closed) {
+        input->initialized = true;
+        input->candidate = false;
+        input->stable = false;
+    }
+    (void)input_changed(input, closed, now_ms);
+    return input->stable;
+}
+
 uint8_t headset_inputs_update(struct headset_inputs *inputs, bool bluetooth,
                               bool pair_down, uint32_t now_ms)
 {

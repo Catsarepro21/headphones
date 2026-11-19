@@ -1,15 +1,37 @@
 /dts-v1/;
 
 #include <nordic/nrf52840_qiaa.dtsi>
+#include <zephyr/dt-bindings/adc/adc.h>
+#include <zephyr/dt-bindings/adc/nrf-saadc.h>
 #include <zephyr/dt-bindings/pinctrl/nrf-pinctrl.h>
 
 / {
     model = "Headphones main PCB";
     compatible = "headphones,headset";
 
+    zephyr,user {
+        io-channels = <&adc 0>;
+    };
+
     chosen {
         zephyr,sram = &sram0;
         zephyr,flash = &flash0;
+    };
+};
+
+&adc {
+    status = "okay";
+    #address-cells = <1>;
+    #size-cells = <0>;
+
+    channel@0 {
+        reg = <0>;
+        zephyr,gain = "ADC_GAIN_2";
+        zephyr,reference = "ADC_REF_INTERNAL";
+        zephyr,acquisition-time = <ADC_ACQ_TIME(ADC_ACQ_TIME_MICROSECONDS, 40)>;
+        zephyr,input-positive = <NRF_SAADC_AIN1>;
+        zephyr,resolution = <12>;
+        zephyr,oversampling = <4>;
     };
 };
 

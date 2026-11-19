@@ -67,5 +67,14 @@ int main(void)
 {
     test_frames();
     test_buttons();
+    struct headset_input boom = {0};
+    assert(!headset_boom_deployed(&boom, true, 0));
+    assert(!headset_boom_deployed(&boom, true, 24));
+    assert(headset_boom_deployed(&boom, true, 25));
+    assert(!headset_boom_deployed(&boom, false, 26));
+    assert(!headset_boom_deployed(&boom, true, 27));
+    assert(!headset_boom_deployed(&boom, false, 28));
+    assert(!headset_boom_deployed(&boom, true, 29));
+    assert(headset_boom_deployed(&boom, true, 54));
     return 0;
 }

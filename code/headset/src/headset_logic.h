@@ -25,6 +25,7 @@ struct headset_inputs {
 };
 
 bool headset_button_pressed(struct headset_input *input, bool down, uint32_t now_ms);
+bool headset_boom_deployed(struct headset_input *input, bool closed, uint32_t now_ms);
 uint8_t headset_inputs_update(struct headset_inputs *inputs, bool bluetooth,
                               bool pair_down, uint32_t now_ms);
 

@@ -1646,7 +1646,26 @@
             (effects
               (font
                 (size 1.27 1.27))))))
-      (embedded_fonts no)))
+      (embedded_fonts no))  (symbol "DongleCompactSymbols:PESD5V0U2BT-QR"
+    (pin_names (offset 0.8))
+    (exclude_from_sim no) (in_bom yes) (on_board yes) (in_pos_files yes)
+    (property "Reference" "D" (at 0 6.35 0) (effects (font (size 1.27 1.27))))
+    (property "Value" "PESD5V0U2BT-QR" (at 0 3.81 0) (effects (font (size 1.27 1.27))))
+    (property "Footprint" "Package_TO_SOT_SMD:SOT-23" (at 0 0 0) (effects (font (size 1.27 1.27)) (hide yes)))
+    (property "Datasheet" "https://assets.nexperia.com/documents/data-sheet/PESD5V0U2BT-Q.pdf" (at 0 0 0) (effects (font (size 1.27 1.27)) (hide yes)))
+    (property "Description" "Dual bidirectional low-capacitance USB data ESD protection"
+        (at 0 0 0) (effects (font (size 1.27 1.27)) (hide yes)))
+    (symbol "PESD5V0U2BT-QR_0_1"
+      (rectangle (start -5.08 3.81) (end 5.08 -3.81)
+        (stroke (width 0.254) (type default)) (fill (type background))))
+    (symbol "PESD5V0U2BT-QR_1_1"
+      (pin passive line (at -10.16 2.54 0) (length 5.08)
+        (name "K1" (effects (font (size 1.27 1.27)))) (number "1" (effects (font (size 1.27 1.27)))))
+      (pin passive line (at -10.16 -2.54 0) (length 5.08)
+        (name "K2" (effects (font (size 1.27 1.27)))) (number "2" (effects (font (size 1.27 1.27)))))
+      (pin passive line (at 0 -7.62 90) (length 3.81)
+        (name "CC" (effects (font (size 1.27 1.27)))) (number "3" (effects (font (size 1.27 1.27)))))))
+  )
   (junction
     (at 113.03 45.72)
     (diameter 0)
@@ -2303,7 +2322,7 @@
         (font
           (size 1.27 1.27))
         (justify left)))
-    (property "Value" "1uF"
+    (property "Value" "10uF"
       (at 116.84 40.6399 0)
       (show_name no)
       (do_not_autoplace no)
@@ -3013,7 +3032,7 @@
         (font
           (size 1.27 1.27))
         (justify right)))
-    (property "Value" "10uF"
+    (property "Value" "4.7uF"
       (at 180.34 49.5299 0)
       (show_name no)
       (do_not_autoplace no)
@@ -3287,10 +3306,30 @@
   (no_connect
     (at 92.71 118.11)
     (uuid "600f7248-e096-4e1b-b030-a1ac4321c6ad"))
-  (text "COMPACT REVISION: LED active-high on P0.05 (U1 pad 15).\nSWD: 1=VTref/VDD, 2=SWDIO, 3=SWDCLK, 4=GND.\nR2/R3 removed: USB data routed directly.\nHigh-voltage supply: verify REGOUT0; keep DCDCEN0 disabled."
+  (text "COMPACT REVISION: LED active-high on P0.05 (U1 pad 15).\nSWD: 1=VTref/VDD, 2=SWDIO, 3=SWDCLK, 4=GND.\nD1 protects USB data. C1 bypasses VBUS; C2 bypasses VDD.\nHigh-voltage supply: verify REGOUT0; keep DCDCEN0 disabled."
     (at 35.56 156.21 0)
     (effects
       (font
         (size 1.27 1.27))
       (justify left top))
-    (uuid "dab254f9-97ca-45c1-bc0d-1430e867fdf8")))
+    (uuid "dab254f9-97ca-45c1-bc0d-1430e867fdf8"))
+  (symbol (lib_id "DongleCompactSymbols:PESD5V0U2BT-QR") (at 220.98 139.7 0) (unit 1)
+    (in_bom yes) (on_board yes) (dnp no) (uuid "456655c1-3286-4faa-a729-172cbb0ef20d")
+    (property "Reference" "D1" (at 220.98 133.35 0) (effects (font (size 1.27 1.27)) ))
+    (property "Value" "PESD5V0U2BT-QR" (at 220.98 135.89 0) (effects (font (size 1.27 1.27)) ))
+    (property "Footprint" "Package_TO_SOT_SMD:SOT-23" (at 220.98 139.7 0) (effects (font (size 1.27 1.27)) (hide yes)))
+    (property "Datasheet" "https://assets.nexperia.com/documents/data-sheet/PESD5V0U2BT-Q.pdf" (at 220.98 139.7 0) (effects (font (size 1.27 1.27)) (hide yes)))
+    (pin "1" (uuid "375558c1-4174-4beb-85d5-c6c5c3eb71f6")) (pin "2" (uuid "95dc5f18-cd73-4cf3-bb74-0ee46557b66a")) (pin "3" (uuid "b4180d28-f465-4df2-9049-73101ed6ff54"))
+    (instances (project "dongle" (path "/be4dda41-c26d-42af-8dca-1eff3f484516" (reference "D1") (unit 1)))))
+  (wire (pts (xy 210.82 137.16) (xy 187.96 137.16)) (stroke (width 0) (type default)) (uuid "902b732a-090e-4cfe-8367-dd4ac2b3877a"))
+  (label "USB_DP_MCU" (at 187.96 137.16 0) (effects (font (size 1.27 1.27)) (justify left bottom)) (uuid "96fd445d-be6d-4890-a9d8-1d48b594c278"))
+  (wire (pts (xy 210.82 142.24) (xy 187.96 142.24)) (stroke (width 0) (type default)) (uuid "e1964620-dc46-4994-bbbb-1d7afe27aab8"))
+  (label "USB_DM_MCU" (at 187.96 142.24 0) (effects (font (size 1.27 1.27)) (justify left bottom)) (uuid "9278c88d-9b22-4080-a2ca-08942534b304"))
+  (wire (pts (xy 220.98 147.32) (xy 220.98 151.13)) (stroke (width 0) (type default)) (uuid "26f19d4d-b918-4f78-aadd-2d210cce35d9"))
+  (symbol (lib_id "DongleCompactSymbols:GND") (at 220.98 151.13 0) (unit 1)
+    (in_bom no) (on_board yes) (dnp no) (uuid "50d561e7-19d1-403e-b6b4-6e1e2ed3d35b")
+    (property "Reference" "#PWR0100" (at 220.98 157.48 0) (effects (font (size 1.27 1.27)) (hide yes)))
+    (property "Value" "GND" (at 220.98 154.94 0) (effects (font (size 1.27 1.27)) ))
+    (pin "1" (uuid "437d37a3-8fbb-4e54-9505-d9bc70742293"))
+    (instances (project "dongle" (path "/be4dda41-c26d-42af-8dca-1eff3f484516" (reference "#PWR0100") (unit 1)))))
+)

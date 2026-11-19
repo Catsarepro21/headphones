@@ -12,6 +12,7 @@ enum bm83_media_control {
 int bm83_start(void);
 void bm83_poll(void);
 void bm83_set_selected(bool selected);
+void bm83_set_mic_muted(bool muted);
 void bm83_request_pairing(void);
 void bm83_request_media(enum bm83_media_control control);
 bool bm83_audio_available(void);

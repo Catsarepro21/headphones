@@ -6,6 +6,7 @@ project(headphone_headset)
 target_sources(app PRIVATE
     src/main.c
     src/headset_logic.c
+    src/battery.c
     src/bm83_link.c
     src/bm83_protocol.c
     src/codec.c

@@ -1642,4 +1642,23 @@
           (effects
             (font
               (size 1.27 1.27))))))
-    (embedded_fonts no)))
+    (embedded_fonts no))  (symbol "PESD5V0U2BT-QR"
+    (pin_names (offset 0.8))
+    (exclude_from_sim no) (in_bom yes) (on_board yes) (in_pos_files yes)
+    (property "Reference" "D" (at 0 6.35 0) (effects (font (size 1.27 1.27))))
+    (property "Value" "PESD5V0U2BT-QR" (at 0 3.81 0) (effects (font (size 1.27 1.27))))
+    (property "Footprint" "Package_TO_SOT_SMD:SOT-23" (at 0 0 0) (effects (font (size 1.27 1.27)) (hide yes)))
+    (property "Datasheet" "https://assets.nexperia.com/documents/data-sheet/PESD5V0U2BT-Q.pdf" (at 0 0 0) (effects (font (size 1.27 1.27)) (hide yes)))
+    (property "Description" "Dual bidirectional low-capacitance USB data ESD protection"
+        (at 0 0 0) (effects (font (size 1.27 1.27)) (hide yes)))
+    (symbol "PESD5V0U2BT-QR_0_1"
+      (rectangle (start -5.08 3.81) (end 5.08 -3.81)
+        (stroke (width 0.254) (type default)) (fill (type background))))
+    (symbol "PESD5V0U2BT-QR_1_1"
+      (pin passive line (at -10.16 2.54 0) (length 5.08)
+        (name "K1" (effects (font (size 1.27 1.27)))) (number "1" (effects (font (size 1.27 1.27)))))
+      (pin passive line (at -10.16 -2.54 0) (length 5.08)
+        (name "K2" (effects (font (size 1.27 1.27)))) (number "2" (effects (font (size 1.27 1.27)))))
+      (pin passive line (at 0 -7.62 90) (length 3.81)
+        (name "CC" (effects (font (size 1.27 1.27)))) (number "3" (effects (font (size 1.27 1.27)))))))
+)

@@ -6,6 +6,12 @@ The cups are closed-back and use 40 mm Dayton drivers, an adjustable OKCSC headb
 
 ![Early Onshape view with the boom mic down](CAD/headset-preview.jpg)
 
+## PCB and schematic
+
+![Top of the headset mainboard in KiCad](PCB/images/mainboard.png)
+
+[![Headset schematic in KiCad](PCB/images/headset-schematic.png)](PCB/images/headset-schematic.png)
+
 ## Files
 
 - [BOM](BOM.md) and [CSV](BOM.csv)
